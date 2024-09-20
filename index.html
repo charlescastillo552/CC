@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 600px;
+            margin: auto;
+            background-color: #f0f4f8; /* Light blue background */
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        .error {
+            color: red;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input {
+            padding: 8px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Grade Calculator</h1>
+    <form id="gradeForm">
+        <label for="prelim">Prelim Grade:(20%):</label>
+        <input type="text" id="prelim" name="prelim" required>
+        <br>
+        <label for="total">Desired Total Grade:</label>
+        <input type="text" id="total" name="total" required>
+        <br>
+        <button type="submit">Compute</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('gradeForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            let prelim = document.getElementById('prelim').value;
+            let total = document.getElementById('total').value;
+
+            fetch('/compute', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    'prelim': prelim,
+                    'total': total
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                let resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = '';
+
+                if (data.error) {
+                    resultDiv.innerHTML = `<p class="error">${data.error}</p>`;
+                } else {
+                    let message = data.chance_to_pass
+                        ? "You have a chance to pass!"
+                        : "It is difficult to pass.";
+
+                    resultDiv.innerHTML = `
+                        <p>Prelim Grade: ${data.prelim}</p>
+                        <p>Total Prelim Contribution (20%): ${data.prelim_contribution.toFixed(2)}</p>
+                        <p>Desired Total Grade: ${data.total}</p>
+                        <p>Required Midterm Grade: ${data.required_midterm.toFixed(2)}</p>
+                        <p>Required Final Grade: ${data.required_finals.toFixed(2)}</p>
+                        <p>${message}</p>
+                    `;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        max-width: 600px;
+        margin: auto;
+        background-color: #f0f4f8; /* Light blue background color */
+        color: #333; /* Darker text color for contrast */
+    }
+    h1 {
+        color: #2c3e50; /* Darker heading color */
+    }
+    .error {
+        color: red;
+    }
+    form {
+        margin-bottom: 20px;
+    }
+    input {
+        padding: 8px;
+        margin-right: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    button {
+        padding: 8px 16px;
+        background-color: #3498db; /* Button background color */
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #2980b9; /* Darker shade on hover */
+    }
+</style>
